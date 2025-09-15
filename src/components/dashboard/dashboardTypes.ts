@@ -1,7 +1,8 @@
-export type Status = "To Do" | "In Progress" | "Review" | "Done";
+export type Status = "ToDo" | "InProgress" | "Review" | "Done";
 
 export type Item = {
   id: number;
+  orig: string;
   title: string;
   status: Status;
 };
