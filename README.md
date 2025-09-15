@@ -1,8 +1,10 @@
-A small set of drag and drop UX examples
+A small set of drag and drop UX examples based on the [react-dnd](https://github.com/react-dnd/react-dnd/) library.
 
 ### Summary
 
-The dnd kit is the most popular tool for drag and drop functionality. It provides a react library, [react-dnd](https://github.com/react-dnd/react-dnd/) for drag and drop.
+The dnd kit is the most popular tool for drag and drop functionality. It provides a react library, [react-dnd](https://github.com/react-dnd/react-dnd/) for easy usage. However combining drag and drop with sorting in multiple containers is a bit tricky.
+
+Code exemplifies sortable multi container flow akin to their [storybook item here](https://master--5fc05e08a4a65d0021ae0bf2.chromatic.com/?path=/story/presets-sortable-multiple-containers--basic-setup).
 
 Concepts:
 
