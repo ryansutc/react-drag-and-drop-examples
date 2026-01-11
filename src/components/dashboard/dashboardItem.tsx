@@ -6,16 +6,24 @@ import type { Item } from "./dashboardTypes";
 export default function DashboardItem({
   item,
   shadowOnly = false,
+  isSelected = false,
 }: {
   item: Item;
   shadowOnly?: boolean;
+  isSelected?: boolean;
 }) {
   const theme = useTheme();
 
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({
-      id: item.id,
-    });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: item.id,
+  });
 
   const style = {
     transform: CSS.Translate.toString(transform),
@@ -36,11 +44,14 @@ export default function DashboardItem({
         width: "100%",
         backgroundColor: shadowOnly
           ? theme.palette.background.default
-          : theme.palette.background.paper,
+          : isSelected
+          ? theme.palette.background.paper
+          : theme.palette.background.default,
         margin: 1,
         padding: 4,
         borderRadius: 2,
         boxShadow: shadowOnly ? "none" : "0 2px 4px rgba(0,0,0,0.1)",
+        cursor: !shadowOnly ? (isDragging ? "grabbing" : "grab") : "default",
       }}
     >
       {!shadowOnly && (

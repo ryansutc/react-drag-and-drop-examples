@@ -38,7 +38,7 @@ export default function Dashboard() {
   /**
    * The id of the item currently being dragged (if any)
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const [activeId, setActiveId] = useState<UniqueIdentifier | number | null>(
     null
   );
@@ -213,7 +213,11 @@ export default function Dashboard() {
               <DropColumn name={status}>
                 <SortableContext items={taskItems[status as Status]}>
                   {taskItems[status as Status].map((taskItem: Item) => (
-                    <DashboardItem key={taskItem.id} item={taskItem} />
+                    <DashboardItem
+                      key={taskItem.id}
+                      item={taskItem}
+                      isSelected={activeId === taskItem.id}
+                    />
                   ))}
                 </SortableContext>
               </DropColumn>
