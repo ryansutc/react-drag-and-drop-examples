@@ -5,9 +5,11 @@ import type { ReactNode } from "react";
 export default function DropColumn({
   children,
   name,
+  height,
 }: {
   children: ReactNode;
   name: string;
+  height: number;
 }) {
   const { isOver, setNodeRef } = useDroppable({ id: name });
 
@@ -19,12 +21,17 @@ export default function DropColumn({
     <Box
       ref={setNodeRef}
       sx={{
-        height: "100%",
+        height: `${height}px`,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "flex-start",
         minHeight: "200px",
+        transition: (theme) =>
+          theme.transitions.create(["height"], {
+            duration: theme.transitions.duration.standard,
+            easing: theme.transitions.easing.easeInOut,
+          }),
       }}
       style={style}
     >
