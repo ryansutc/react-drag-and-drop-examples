@@ -3,6 +3,7 @@ import { cloneTasks } from "@/utls/taskHelpers";
 import {
   closestCenter,
   DndContext,
+  DragOverlay,
   type DragEndEvent,
   type DragOverEvent,
   type DragStartEvent,
@@ -16,6 +17,7 @@ import {
 import { Grid } from "@mui/material";
 import { useMemo, useReducer, useState } from "react";
 import DashboardItem from "./dashboardItem";
+import DashboardItemContent from "./dashboardItemContent";
 import type { Item, Status } from "./dashboardTypes";
 import DropColumn from "./dropColumn";
 
@@ -84,7 +86,6 @@ export default function Dashboard() {
   const [taskItems, dispatch] = useReducer(taskReducer, items);
   const flattenedItems = Object.values(taskItems).flat() as readonly Item[];
   const [previewStatus, setPreviewStatus] = useState<Status | null>(null);
-  console.log(taskItems["Done"]);
 
   /**
    * A copy of the task items used for restoring state if drag is cancelled!
@@ -107,7 +108,6 @@ export default function Dashboard() {
   /**
    * The id of the item currently being dragged (if any)
    */
-
   const [activeId, setActiveId] = useState<UniqueIdentifier | number | null>(
     null,
   );
@@ -186,29 +186,17 @@ export default function Dashboard() {
 
     const overId = over.id;
     const activeId = active.id;
+    /** the column that the CURSOR is over, might not also yet be activeDropColumn */
     const overDropColumn = findColumnName(overId.toString());
+    /* items CURRENT column in live state */
     const activeDropColumn = findColumnName(activeId.toString());
-    const savedActiveDropColumn = findColumnName(activeId.toString(), true);
 
     if (!activeDropColumn || !overDropColumn) {
       return;
     }
 
-    if (savedActiveDropColumn !== overDropColumn) {
-      if (activeDropColumn === overDropColumn) {
-        dispatch({
-          type: "REORDER_IN_COLUMN",
-          column: overDropColumn,
-          fromIndex: taskItems[overDropColumn].findIndex(
-            (item) => item.id === activeId,
-          ),
-          toIndex:
-            taskItems[overDropColumn].findIndex((item) => item.id === overId) ??
-            taskItems[overDropColumn].length,
-        });
-        return;
-      }
-
+    if (activeDropColumn !== overDropColumn) {
+      // Cross-column move (including back to original column)
       const overItems = taskItems[overDropColumn];
       const overIndex = overItems.findIndex((item) => item.id === overId);
       const insertIndex = overIndex === -1 ? overItems.length + 1 : overIndex;
@@ -219,6 +207,18 @@ export default function Dashboard() {
         toColumn: overDropColumn,
         itemId: activeId,
         insertIndex,
+      });
+    } else {
+      // Reorder within the same column during drag
+      dispatch({
+        type: "REORDER_IN_COLUMN",
+        column: overDropColumn,
+        fromIndex: taskItems[overDropColumn].findIndex(
+          (item) => item.id === activeId,
+        ),
+        toIndex:
+          taskItems[overDropColumn].findIndex((item) => item.id === overId) ??
+          taskItems[overDropColumn].length,
       });
     }
   };
@@ -287,14 +287,14 @@ export default function Dashboard() {
                 <SortableContext items={taskItems[status as Status]}>
                   {taskItems[status as Status]
                     .filter((task) => task && task.id)
-                    .map((taskItem: Item) => (
+                    .map((taskItem: Item, index: number) => (
                       <DashboardItem
                         key={taskItem.id}
                         item={taskItem}
+                        index={index}
                         isSelected={taskItem && activeId === taskItem.id}
-                        isMoving={
-                          previewStatus !== status && activeId === taskItem.id
-                        }
+                        isMoving={activeId === taskItem.id}
+                        shadowOnly={activeId === taskItem.id}
                       />
                     ))}
                 </SortableContext>
@@ -302,6 +302,14 @@ export default function Dashboard() {
             </Grid>
           ))}
         </SortableContext>
+        <DragOverlay>
+          {activeId ? (
+            <DashboardItemContent
+              item={flattenedItems.find((i) => i.id === activeId)!}
+              isDragging
+            />
+          ) : null}
+        </DragOverlay>
       </DndContext>
     </Grid>
   );
